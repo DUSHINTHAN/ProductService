@@ -1,10 +1,13 @@
 package com.scaler.productservice.controllers;
 
+import com.scaler.productservice.dtos.CreateProductRequestDto;
 import com.scaler.productservice.models.Product;
 import com.scaler.productservice.services.ProductService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class ProductController {
@@ -16,20 +19,37 @@ public class ProductController {
         this.productService =  productService;
     }
     @GetMapping("/products")
-    public void getAllProducts() {
+    public List<Product> getAllProducts() {
         // Logic to retrieve all products
+           return productService.getAllProducts();
     }
 
     @GetMapping("/products/{Id}")
-    public Product getProductDetails(@PathVariable("Id") long id) {
+    public ResponseEntity<Product> getProductDetails(@PathVariable("Id") long id) {
         // Logic to retrieve product details by ID
 
-        return productService.getProductDetails(id);
+        Product product =  productService.getProductDetails(id);
 
+        ResponseEntity<Product> responseEntity = new ResponseEntity<>(product, HttpStatusCode.valueOf(201));
+
+        return responseEntity;
     }
 
-    public void createProduct() {
+    @PostMapping("/products")
+    public ResponseEntity<Product> createProduct(@RequestBody CreateProductRequestDto createProductRequestDto) {
         // Logic to create a new product
+
+        Product product = productService.createProduct(
+                createProductRequestDto.getTitle(),
+                createProductRequestDto.getDescription(),
+                createProductRequestDto.getImage(),
+                createProductRequestDto.getPrice(),
+                createProductRequestDto.getCategory()
+        );
+
+        ResponseEntity<Product> responseEntity = new ResponseEntity<>(product, HttpStatusCode.valueOf(201));
+
+        return responseEntity;
     }
 
 
