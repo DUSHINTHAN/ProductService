@@ -1,6 +1,7 @@
 package com.scaler.productservice.controllers;
 
 import com.scaler.productservice.dtos.CreateProductRequestDto;
+import com.scaler.productservice.exceptions.ProductNotFoundException;
 import com.scaler.productservice.models.Product;
 import com.scaler.productservice.services.ProductService;
 import org.springframework.http.HttpStatusCode;
@@ -25,7 +26,7 @@ public class ProductController {
     }
 
     @GetMapping("/products/{Id}")
-    public ResponseEntity<Product> getProductDetails(@PathVariable("Id") long id) {
+    public ResponseEntity<Product> getProductDetails(@PathVariable("Id") long id) throws ProductNotFoundException {
         // Logic to retrieve product details by ID
 
         Product product =  productService.getProductDetails(id);
@@ -52,5 +53,9 @@ public class ProductController {
         return responseEntity;
     }
 
+    @ExceptionHandler(Exception.class)
+    public void handleAllExceptions() {
+        // Logic to handle exceptions
 
+    }
 }

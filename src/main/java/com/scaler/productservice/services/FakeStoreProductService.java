@@ -2,6 +2,7 @@ package com.scaler.productservice.services;
 
 import com.scaler.productservice.dtos.FakeStoreCreateProductDto;
 import com.scaler.productservice.dtos.FakeStoreProductDto;
+import com.scaler.productservice.exceptions.ProductNotFoundException;
 import com.scaler.productservice.models.Product;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatusCode;
@@ -23,7 +24,7 @@ public class FakeStoreProductService implements ProductService{
     }
 
     @Override
-    public Product getProductDetails(long id) {
+    public Product getProductDetails(long id) throws ProductNotFoundException {
         // TODO Auto-generated method stub
 
  //       FakeStoreProductDto responseDto =
@@ -46,6 +47,11 @@ public class FakeStoreProductService implements ProductService{
             //show some error message or throw some exception
   //          return null;
   //      }
+        FakeStoreProductDto responseBody = responseEntity.getBody();
+        if(responseBody == null){
+
+            throw new ProductNotFoundException("Product Not Found with id: " + id);
+        }
 
 
         return responseEntity.getBody().toProduct();
