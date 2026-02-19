@@ -1,5 +1,6 @@
 package com.scaler.productservice.models;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.Getter;
@@ -15,8 +16,7 @@ public class Product extends BaseModel{
     private double price;
     private String imageUrl;
 
-    @ManyToOne
+    @ManyToOne(cascade = {CascadeType.PERSIST}) // This cascadeType will ensure that if a new category is created while creating a product, it will be saved to the database and then add
     private Category category;
-
 
 }
