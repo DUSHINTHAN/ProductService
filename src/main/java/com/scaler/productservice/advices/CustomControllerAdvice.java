@@ -1,6 +1,8 @@
 package com.scaler.productservice.advices;
 
 import com.scaler.productservice.dtos.ErrorDto;
+import com.scaler.productservice.exceptions.InvalidWebhookSignatureException;
+import com.scaler.productservice.exceptions.PaymentProcessingException;
 import com.scaler.productservice.exceptions.ProductNotFoundException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -30,5 +32,23 @@ public class CustomControllerAdvice {
 
 
         return responseEntity;
+    }
+
+    @ExceptionHandler(InvalidWebhookSignatureException.class)
+    public ResponseEntity<ErrorDto> handleInvalidWebhookSignatureException(InvalidWebhookSignatureException e) {
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage(e.getMessage());
+
+        return new ResponseEntity<>(errorDto, HttpStatusCode.valueOf(400));
+
+    }
+
+
+    @ExceptionHandler(PaymentProcessingException.class)
+    public ResponseEntity<ErrorDto> handlePaymentProcessingException(PaymentProcessingException e) {
+        ErrorDto errorDto = new ErrorDto();
+        errorDto.setMessage(e.getMessage());
+
+        return new ResponseEntity<>(errorDto, HttpStatusCode.valueOf(500));
     }
 }

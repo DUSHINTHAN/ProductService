@@ -11,10 +11,10 @@ public class PaymentService {
         this.paymentGatewaySelector = paymentGatewaySelector;
     }
 
-    public String generatePaymentLink() {
+    public String createPaymentLink(String orderId, Long amount, String returnUrl, String idempotencyKey) {
         // Logic to generate payment link
 
-        return paymentGatewaySelector.getPaymentGateway().generatePaymentLink();
+        return paymentGatewaySelector.getPaymentGateway().generatePaymentLink(orderId, amount, returnUrl, idempotencyKey);
     }
 
 }

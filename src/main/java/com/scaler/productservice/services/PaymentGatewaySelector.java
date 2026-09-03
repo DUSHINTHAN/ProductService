@@ -17,7 +17,8 @@ public class PaymentGatewaySelector {
 
         // Logic to select the appropriate payment gateway based on some criteria
         // For example, you can use a configuration property or a request parameter to determine which gateway to use
-        // Here, we will just return StripePaymentGateway for demonstration purposes
+        //here we return stripe because razorPay has some issues thus we use stripe for now
+
         return stripePaymentGateway;
     }
 }

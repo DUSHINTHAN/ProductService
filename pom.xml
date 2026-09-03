@@ -55,6 +55,14 @@
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 
+		<!-- Source: https://mvnrepository.com/artifact/com.stripe/stripe-java -->
+		<dependency>
+			<groupId>com.stripe</groupId>
+			<artifactId>stripe-java</artifactId>
+			<version>33.3.0</version>
+			<scope>compile</scope>
+		</dependency>
+
 		<!--DevTools (optional for development)-->
        <dependency>
            <groupId>org.springframework.boot</groupId>
