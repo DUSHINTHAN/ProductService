@@ -17,7 +17,7 @@ public class PaymentController  {
         this.paymentService = paymentService;
     }
 
-    @PostMapping("/Payments")
+    @PostMapping("/payments")
     public ResponseEntity<String> initiatePayment(@RequestBody PaymentRequestDto dto) {
         // Logic to initiate payment
 

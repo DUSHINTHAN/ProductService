@@ -30,9 +30,9 @@ public class StripePaymentGateway implements PaymentGateway{
                             PriceCreateParams.ProductData.builder().setName("Order " + orderId).build()
                     )
                     .build();
-            RequestOptions requestOptions = RequestOptions.builder().setIdempotencyKey(idempotencyKey).build();
+            RequestOptions priceOptions  = RequestOptions.builder().setIdempotencyKey(idempotencyKey + "-price").build();
 
-            Price price = Price.create(priceParams, requestOptions);
+            Price price = Price.create(priceParams, priceOptions);
 
             PaymentLinkCreateParams linkCreateParams = PaymentLinkCreateParams.builder()
                     .addLineItem(
@@ -52,7 +52,10 @@ public class StripePaymentGateway implements PaymentGateway{
                                     .build()
                     )
                     .build();
-            PaymentLink paymentLink = PaymentLink.create(linkCreateParams, requestOptions);
+
+            RequestOptions linkOptions  = RequestOptions.builder().setIdempotencyKey(idempotencyKey + "-link").build();
+
+            PaymentLink paymentLink = PaymentLink.create(linkCreateParams, linkOptions);
 
             return paymentLink.getUrl();
         }

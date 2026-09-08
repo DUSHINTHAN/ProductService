@@ -37,6 +37,5 @@ public class StripeWebhookController {
 
             throw new InvalidWebhookSignatureException("Invalid webhook signature: " + e.getMessage());
         }
-
     }
 }
