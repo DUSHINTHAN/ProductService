@@ -5,33 +5,48 @@ import com.scaler.productservice.models.Category;
 import com.scaler.productservice.models.Product;
 import com.scaler.productservice.repositories.CategoryRepository;
 import com.scaler.productservice.repositories.ProductRepository;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import javax.xml.crypto.Data;
-import java.awt.*;
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 
 @Service("databaseProductService")
 public class DatabaseProductService implements ProductService{
 
+    private RedisTemplate<String, Product> redisTemplate;
     ProductRepository productRepository;
     CategoryRepository categoryRepository;
 
-    public DatabaseProductService(ProductRepository productRepository, CategoryRepository categoryRepository) {
+    public DatabaseProductService(ProductRepository productRepository, CategoryRepository categoryRepository, RedisTemplate<String, Product> redisTemplate) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
     public Product getProductDetails(long id)throws ProductNotFoundException {
-        Optional<Product> optionalFromDatabase = productRepository.findById(id);
-        if(optionalFromDatabase.isEmpty()){
+
+        Product productFromCache = redisTemplate.opsForValue().get(String.valueOf(id));
+
+        if(productFromCache != null){
+
+            return productFromCache;
+        }
+
+        Optional<Product> productOptionalFromDatabase = productRepository.findById(id);
+
+        if(productOptionalFromDatabase.isEmpty()){
+
             throw new ProductNotFoundException("Product Not Found with id: " + id);
         }
-        else{
-            return optionalFromDatabase.get();
-        }
+
+        Product productFromDatabase = productOptionalFromDatabase.get();
+
+        redisTemplate.opsForValue().set(String.valueOf(id), productFromDatabase, Duration.ofMinutes(10));
+
+        return productFromDatabase;
 
     }
 
