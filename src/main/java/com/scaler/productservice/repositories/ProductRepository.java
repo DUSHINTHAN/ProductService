@@ -19,6 +19,11 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     List<Product> findAll();
 
+    // NEW — soft delete aware lookups used by DatabaseProductService
+    Optional<Product> findByIdAndIsDeletedFalse(long id);
+
+    List<Product> findAllByIsDeletedFalse();
+
     Optional<Product> findByTitleAndCategory_Name(String title, String categoryName);
 
     @Query("SELECT p FROM Product p WHERE p.category.name = :categoryName")

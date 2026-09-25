@@ -1,6 +1,7 @@
 package com.scaler.productservice.controllers;
 
 import com.scaler.productservice.dtos.CreateProductRequestDto;
+import com.scaler.productservice.dtos.UpdateProductRequestDto;
 import com.scaler.productservice.exceptions.ProductNotFoundException;
 import com.scaler.productservice.models.Product;
 import com.scaler.productservice.services.ProductService;
@@ -32,7 +33,7 @@ public class ProductController {
 
         Product product =  productService.getProductDetails(id);
 
-        ResponseEntity<Product> responseEntity = new ResponseEntity<>(product, HttpStatusCode.valueOf(201));
+        ResponseEntity<Product> responseEntity = new ResponseEntity<>(product, HttpStatusCode.valueOf(200));
 
         return responseEntity;
     }
@@ -53,6 +54,35 @@ public class ProductController {
 
         return responseEntity;
     }
+
+    @PutMapping("/products/{Id}")
+    public ResponseEntity<Product> updateProduct(@PathVariable("Id") long id, @RequestBody UpdateProductRequestDto updateProductRequestDto){
+
+        //logic to update the existing product
+
+        Product product = productService.updateProduct(
+                id,
+                updateProductRequestDto.getTitle(),
+                updateProductRequestDto.getDescription(),
+                updateProductRequestDto.getImage(),
+                updateProductRequestDto.getPrice(),
+                updateProductRequestDto.getCategory()
+        );
+
+        return new ResponseEntity<>(product, HttpStatusCode.valueOf(200));
+    }
+
+    @DeleteMapping("/products/{Id}")
+    public ResponseEntity<Void> deleteProduct(@PathVariable ("Id") long id){
+
+        //logic to soft-delete the product
+
+        productService.deleteProduct(id);
+
+        return new ResponseEntity<>(HttpStatusCode.valueOf(204));
+    }
+
+
 
 //    @ExceptionHandler(Exception.class)
 //    public void handleAllExceptions() {

@@ -26,7 +26,7 @@ public class DatabaseProductService implements ProductService{
     }
 
     @Override
-    public Product getProductDetails(long id)throws ProductNotFoundException {
+    public Product getProductDetails(long id) {
 
         Product productFromCache = redisTemplate.opsForValue().get(String.valueOf(id));
 
@@ -35,7 +35,7 @@ public class DatabaseProductService implements ProductService{
             return productFromCache;
         }
 
-        Optional<Product> productOptionalFromDatabase = productRepository.findById(id);
+        Optional<Product> productOptionalFromDatabase = productRepository.findByIdAndIsDeletedFalse(id);
 
         if(productOptionalFromDatabase.isEmpty()){
 
@@ -53,7 +53,7 @@ public class DatabaseProductService implements ProductService{
     @Override
     public List<Product> getAllProducts() {
 
-        return productRepository.findAll();
+        return productRepository.findAllByIsDeletedFalse();
     }
 
     @Override
@@ -80,5 +80,72 @@ public class DatabaseProductService implements ProductService{
 
 
         return productRepository.save(product);
+    }
+
+    @Override
+    public Product updateProduct(long id, String title, String description, String image, double price, String CategoryName) {
+
+        Optional<Product> productOptional = productRepository.findByIdAndIsDeletedFalse(id);
+
+        if(productOptional.isEmpty()){
+
+            throw new ProductNotFoundException("Product Not Found with id: " + id);
+        }
+
+        Product product  = productOptional.get();
+
+        if(title != null){
+            product.setTitle(title);
+        }
+        if(description != null){
+            product.setDescription(description);
+        }
+        if(image != null){
+            product.setImageUrl(image);
+        }
+        if(price > 0){
+            product.setPrice(price);
+        }
+
+        if(CategoryName != null){
+
+            Category categoryNameFromDatabase = categoryRepository.findByName(CategoryName);
+
+            if(categoryNameFromDatabase == null){
+
+                Category newCategory = new Category();
+                newCategory.setName(CategoryName);
+
+                categoryNameFromDatabase = newCategory;
+            }
+
+            product.setCategory(categoryNameFromDatabase);
+        }
+
+        Product updatedProduct = productRepository.save(product);
+
+        // Invalidate the cache for the updated product
+        redisTemplate.delete(String.valueOf(id));
+
+        return updatedProduct;
+    }
+
+    public void deleteProduct(long id) {
+
+        Optional<Product> productOptional = productRepository.findByIdAndIsDeletedFalse(id);
+
+        if(productOptional.isEmpty()){
+
+            throw new ProductNotFoundException("Product Not Found with id: " + id);
+        }
+
+        Product product  = productOptional.get();
+
+        product.setIsDeleted(true);
+
+        productRepository.save(product);
+
+        // Invalidate the cache for the deleted product
+        redisTemplate.delete(String.valueOf(id));
     }
 }
