@@ -24,6 +24,6 @@ public class SearchService {
 
         Pageable pageable = PageRequest.of(pageNumber, size, sort);
 
-        return productRepository.findByTitleContaining(query, pageable);
+        return productRepository.findByTitleContainingAndIsDeletedFalse(query, pageable);
     }
 }

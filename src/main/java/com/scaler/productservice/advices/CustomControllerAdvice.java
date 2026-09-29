@@ -17,7 +17,7 @@ public class CustomControllerAdvice {
         ErrorDto errorDto = new ErrorDto();
         errorDto.setMessage("Something went wrong. Please try again later.");
 
-        ResponseEntity<ErrorDto> responseEntity = new ResponseEntity<>(errorDto, HttpStatusCode.valueOf(501));
+        ResponseEntity<ErrorDto> responseEntity = new ResponseEntity<>(errorDto, HttpStatusCode.valueOf(500));
 
 
         return responseEntity;

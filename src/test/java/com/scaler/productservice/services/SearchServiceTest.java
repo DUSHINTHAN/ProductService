@@ -33,7 +33,7 @@ class SearchServiceTest {
 
         Page<Product> fakePage = new PageImpl<>(productList);
 
-        when(productRepository.findByTitleContaining(eq("phone"), any(Pageable.class)))
+        when(productRepository.findByTitleContainingAndIsDeletedFalse(eq("phone"), any(Pageable.class)))
                 .thenReturn(fakePage);
 
         Page<Product> result = searchService.searchProducts("phone", 0, 10);
@@ -48,7 +48,7 @@ class SearchServiceTest {
 
         Page<Product> emptyPage = new PageImpl<>(emptyList);
 
-        when(productRepository.findByTitleContaining(eq("zzz"), any(Pageable.class)))
+        when(productRepository.findByTitleContainingAndIsDeletedFalse(eq("zzz"), any(Pageable.class)))
                 .thenReturn(emptyPage);
 
         Page<Product> result = searchService.searchProducts("zzz", 0, 10);

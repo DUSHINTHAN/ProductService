@@ -46,7 +46,7 @@ class ProductControllerTest {
     }
 
     @Test
-    void getProductDetails_found_returns201WithProduct() {
+    void getProductDetails_found_returns200WithProduct() {
 
         Product product = new Product();
         product.setId(1L);
@@ -56,7 +56,7 @@ class ProductControllerTest {
 
         ResponseEntity<Product> response = productController.getProductDetails(1L);
 
-        Assertions.assertEquals(201, response.getStatusCode().value());
+        Assertions.assertEquals(200, response.getStatusCode().value());
         Assertions.assertEquals("Test Product", response.getBody().getTitle());
     }
 

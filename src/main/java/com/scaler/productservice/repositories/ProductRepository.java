@@ -40,5 +40,5 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     @Query(value = "SELECT title, description FROM product WHERE id = :id", nativeQuery = true)
     ProductTitleAndDescription getProductDetail3(@Param("id") long id);
 
-    Page<Product> findByTitleContaining(String query, Pageable pageable);
+    Page<Product> findByTitleContainingAndIsDeletedFalse(String query, Pageable pageable);
 }
