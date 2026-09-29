@@ -14,6 +14,7 @@ public class SearchService {
     private ProductRepository productRepository;
 
     public SearchService(ProductRepository productRepository){
+
         this.productRepository = productRepository;
     }
 
