@@ -49,7 +49,7 @@
 			<artifactId>flyway-core</artifactId>
 		</dependency>
 
-		<!-- Flyway MySQL Support (Required for Boot 4) -->
+
 		<dependency>
 			<groupId>org.flywaydb</groupId>
 			<artifactId>flyway-mysql</artifactId>
