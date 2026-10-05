@@ -16,6 +16,7 @@ Backend service for an e-commerce catalog: product CRUD with soft delete, Redis 
 - **Swappable design:** `ProductService` and `PaymentGateway` are interfaces, so the data source and the payment provider can change without touching controllers or `PaymentService`.
 - **35 unit tests** (JUnit 5 + Mockito) covering controllers and services.
 - **Twelve-factor style config:** database, Redis and Stripe settings all come from environment variables.
+- **Health check endpoint:** exposes `GET /actuator/health` (Spring Boot Actuator) for Elastic Beanstalk load balancer health checks.
 
 ## Architecture
 
