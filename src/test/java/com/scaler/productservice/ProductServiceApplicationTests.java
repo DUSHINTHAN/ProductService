@@ -29,7 +29,7 @@ class ProductServiceApplicationTests {
 	@Test
 	public void test() {
 
-		Optional<Product> productOptional = productRepository.findByTitleAndCategory_Name("iPhone", "Electronics");
+		Optional<Product> productOptional = productRepository.findByTitleAndCategory_Name("iphone", "Phones");
 
 		System.out.println(productOptional.get().getTitle());
 	}
