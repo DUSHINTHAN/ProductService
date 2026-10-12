@@ -191,4 +191,69 @@ class DatabaseProductServiceTest {
                 () -> databaseProductService.deleteProduct(99L));
     }
 
+    @Test
+    void updateProduct_existingCategory_reusesIt() {
+
+        Product existing = new Product();
+        existing.setId(6L);
+        existing.setTitle("Old Title");
+
+        Category electronics = new Category();
+        electronics.setId(5L);
+        electronics.setName("Electronics");
+
+        when(productRepository.findByIdAndIsDeletedFalse(6L))
+                .thenReturn(Optional.of(existing));
+        when(categoryRepository.findByName("Electronics"))
+                .thenReturn(electronics);
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Product result = databaseProductService.updateProduct(
+                6L, "New Title", null, null, 0.0, "Electronics");
+
+        Assertions.assertEquals("New Title", result.getTitle());
+        Assertions.assertEquals(5L, result.getCategory().getId());
+        Assertions.assertEquals("Electronics", result.getCategory().getName());
+
+        verify(categoryRepository, times(1)).findByName("Electronics");
+        verify(categoryRepository, never()).save(any());
+        verify(redisTemplate, times(1)).delete("6");
+    }
+
+
+    @Test
+    void updateProduct_nullFieldsAndZeroPrice_keepsExistingValues() {
+
+        Product existing = new Product();
+        existing.setId(5L);
+        existing.setTitle("Old Title");
+        existing.setDescription("Old Description");
+        existing.setImageUrl("old.png");
+        existing.setPrice(100.0);
+
+        Category existingCategory = new Category();
+        existingCategory.setName("Old Category");
+        existing.setCategory(existingCategory);
+
+        when(productRepository.findByIdAndIsDeletedFalse(5L))
+                .thenReturn(Optional.of(existing));
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        Product result = databaseProductService.updateProduct(
+                5L, null, null, null, 0.0, null);
+
+        Assertions.assertEquals("Old Title", result.getTitle());
+        Assertions.assertEquals("Old Description", result.getDescription());
+        Assertions.assertEquals("old.png", result.getImageUrl());
+        Assertions.assertEquals(100.0, result.getPrice());
+        Assertions.assertEquals("Old Category", result.getCategory().getName());
+
+        verify(categoryRepository, never()).findByName(any());
+        verify(productRepository, times(1)).save(existing);
+        verify(redisTemplate, times(1)).delete("5");
+    }
+
+
 }
