@@ -6,7 +6,8 @@
 ![Redis](https://img.shields.io/badge/Redis-Cloud-DC382D)
 ![AWS](https://img.shields.io/badge/AWS-Elastic_Beanstalk-FF9900)
 ![Stripe](https://img.shields.io/badge/Stripe-Payment_Links-635BFF)
-![Tests](https://img.shields.io/badge/Unit_tests-35-brightgreen)
+![Tests](https://img.shields.io/badge/Tests-48_passing-brightgreen)
+![Coverage](https://img.shields.io/badge/Coverage-86%25-brightgreen)
 
 Backend service for an e-commerce catalog: product CRUD with soft delete, Redis cache-aside reads, paginated title search, and Stripe Payment Link creation with webhook signature verification. Deployed on AWS behind an Application Load Balancer with HTTPS, using Elastic Beanstalk, Amazon RDS (MySQL) and Redis Cloud.
 
@@ -20,7 +21,7 @@ Backend service for an e-commerce catalog: product CRUD with soft delete, Redis 
 | Database load | 72 of 90 requests in the benchmark were served from Redis, **80% fewer database reads** |
 | Deployment | Elastic Beanstalk, Application Load Balancer, HTTPS (ACM), Route 53 DNS, Amazon RDS, Redis Cloud |
 | Payments | Stripe Payment Links with idempotency keys and signature-verified webhooks |
-| Testing | 35 JUnit 5 + Mockito unit tests; full CRUD lifecycle validated on the deployed API |
+| Testing | 48 automated tests (unit and repository level) with **86% instruction and 93% branch coverage** (JaCoCo); full CRUD lifecycle validated on the deployed API |
 
 ## Try it live
 
@@ -44,7 +45,7 @@ Demo deployment: Stripe runs in test mode.
 | Payments | Stripe Java SDK (Payment Links, webhooks) |
 | Cloud | AWS Elastic Beanstalk, Application Load Balancer, Route 53, ACM, Amazon RDS |
 | Operations | Spring Boot Actuator health endpoint |
-| Testing and build | JUnit 5, Mockito, Maven |
+| Testing and build | JUnit 5, Mockito, JaCoCo, Maven |
 
 ## Highlights
 
@@ -220,13 +221,21 @@ The deployed API at `https://productengine.dev` was exercised end to end with Po
 
 ## Testing
 
-35 JUnit 5 and Mockito unit tests cover the controllers and services with mocked dependencies, so they run without MySQL, Redis or Stripe: cache hit and miss, cache eviction on update and delete, not-found handling, paginated search, payment amount calculation, and payment failure paths.
+JaCoCo reports **86% instruction coverage** and **93% branch coverage** across the codebase, measured over the full suite of **48 automated tests**: 41 JUnit 5 and Mockito unit tests that run with mocked dependencies, and 7 Spring Boot context and repository tests that run against MySQL and Redis.
+
+The core product, search and payment-calculation logic (`DatabaseProductService`, `FakeStoreProductService`, `PaymentService`, `SearchService`, `PaymentGatewaySelector`), the product, search and payment controllers, and the global exception handler are at 100% instruction coverage, including every branch in the two product services.
+
+The tests verify cache hit and miss, cache eviction on update and delete, partial-update behaviour, category reuse and creation, soft delete, not-found handling, paginated search, payment amount calculation in paise, gateway failure propagation, the HTTP status mapping of the exception handler (404, 400, 500), and the custom repository queries and fetch behaviour.
 
 ```bash
+# Full suite (requires the configured MySQL and Redis setup)
+./mvnw test
+
+# Unit tests
 ./mvnw test -Dtest='!ProductServiceApplicationTests'
 ```
 
-`ProductServiceApplicationTests` holds the repository and context tests, which run separately against a live MySQL and Redis with sample data loaded.
+The HTML coverage report is generated at `target/site/jacoco/index.html`.
 
 ## Project structure
 
