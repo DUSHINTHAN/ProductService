@@ -29,7 +29,12 @@ class DatabaseProductServiceTest {
     private final ValueOperations<String, Product> valueOperations = Mockito.mock(ValueOperations.class);
 
     private final DatabaseProductService databaseProductService =
-            new DatabaseProductService(productRepository, categoryRepository, redisTemplate);
+            new DatabaseProductService(
+                    productRepository, categoryRepository, redisTemplate, true);
+
+    private final DatabaseProductService cacheDisabledService =
+            new DatabaseProductService(
+                    productRepository, categoryRepository, redisTemplate, false);
 
     // ---------- getProductDetails ----------
 
@@ -76,6 +81,57 @@ class DatabaseProductServiceTest {
                 () -> databaseProductService.getProductDetails(999L));
 
         verify(valueOperations, never()).set(any(), any(), any());
+    }
+    @Test
+    void getProductDetails_cacheDisabled_goesStraightToDb_andNeverTouchesRedis() {
+
+        Product fromDb = new Product();
+        fromDb.setId(7L);
+        fromDb.setTitle("DB Only Product");
+
+        when(productRepository.findByIdAndIsDeletedFalse(7L))
+                .thenReturn(Optional.of(fromDb));
+
+        Product result = cacheDisabledService.getProductDetails(7L);
+
+        Assertions.assertEquals("DB Only Product", result.getTitle());
+
+        verify(productRepository, times(1))
+                .findByIdAndIsDeletedFalse(7L);
+
+        verifyNoInteractions(redisTemplate);
+    }
+
+    @Test
+    void getProductDetails_cacheDisabled_notFound_throwsAndNeverTouchesRedis() {
+
+        when(productRepository.findByIdAndIsDeletedFalse(999L))
+                .thenReturn(Optional.empty());
+
+        Assertions.assertThrows(
+                ProductNotFoundException.class,
+                () -> cacheDisabledService.getProductDetails(999L));
+
+        verifyNoInteractions(redisTemplate);
+    }
+
+    @Test
+    void updateProduct_cacheDisabled_stillInvalidatesCacheKey() {
+
+        Product existing = new Product();
+        existing.setId(8L);
+        existing.setTitle("Old Title");
+
+        when(productRepository.findByIdAndIsDeletedFalse(8L))
+                .thenReturn(Optional.of(existing));
+
+        when(productRepository.save(any(Product.class)))
+                .thenAnswer(inv -> inv.getArgument(0));
+
+        cacheDisabledService.updateProduct(
+                8L, "New Title", null, null, 0.0, null);
+
+        verify(redisTemplate, times(1)).delete("8");
     }
 
     // ---------- getAllProducts ----------

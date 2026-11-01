@@ -5,6 +5,7 @@ import com.scaler.productservice.models.Category;
 import com.scaler.productservice.models.Product;
 import com.scaler.productservice.repositories.CategoryRepository;
 import com.scaler.productservice.repositories.ProductRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -18,21 +19,26 @@ public class DatabaseProductService implements ProductService{
     private RedisTemplate<String, Product> redisTemplate;
     ProductRepository productRepository;
     CategoryRepository categoryRepository;
+    private final boolean cacheEnabled;
 
-    public DatabaseProductService(ProductRepository productRepository, CategoryRepository categoryRepository, RedisTemplate<String, Product> redisTemplate) {
+    public DatabaseProductService(ProductRepository productRepository, CategoryRepository categoryRepository, RedisTemplate<String, Product> redisTemplate, @Value("${app.cache.enabled:true}") boolean cacheEnabled) {
         this.productRepository = productRepository;
         this.categoryRepository = categoryRepository;
         this.redisTemplate = redisTemplate;
+        this.cacheEnabled = cacheEnabled;
     }
 
     @Override
     public Product getProductDetails(long id) {
 
-        Product productFromCache = redisTemplate.opsForValue().get(String.valueOf(id));
+        if(cacheEnabled){
 
-        if(productFromCache != null){
+            Product productFromCache = redisTemplate.opsForValue().get(String.valueOf(id));
 
-            return productFromCache;
+            if(productFromCache != null){
+
+                return productFromCache;
+            }
         }
 
         Optional<Product> productOptionalFromDatabase = productRepository.findByIdAndIsDeletedFalse(id);
@@ -44,7 +50,11 @@ public class DatabaseProductService implements ProductService{
 
         Product productFromDatabase = productOptionalFromDatabase.get();
 
-        redisTemplate.opsForValue().set(String.valueOf(id), productFromDatabase, Duration.ofMinutes(10));
+        if(cacheEnabled) {
+
+            redisTemplate.opsForValue().set(String.valueOf(id), productFromDatabase, Duration.ofMinutes(10));
+
+        }
 
         return productFromDatabase;
 
